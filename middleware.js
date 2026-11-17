@@ -1,12 +1,13 @@
 export const config = {
   matcher: [
     /*
-     * 匹配除以下静态资源之外的所有路径。
+     * 匹配除以下静态资源与独立服务之外的所有路径。
      * /api/auth 在 middleware 内按完整 pathname 精确放行，避免相似前缀绕过认证。
      * - 静态文件 (以 . 结尾)
      * - 其他静态资源
+     * - /mcp 与 /healthz 由 MCP 服务处理，不属于页面入口，和 Docker 中 nginx 的 auth_basic off 保持一致
      */
-    '/((?!_next/static|_next/image|favicon.ico|assets/|.*\\.).*)'
+    '/((?!_next/static|_next/image|favicon.ico|assets/|mcp(?:/|$)|healthz(?:/|$)|.*\\.).*)'
   ],
 };
 

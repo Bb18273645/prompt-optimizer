@@ -1,16 +1,50 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "buildCommand": "if [[ $(pwd) == */packages/extension ]]; then cd ../.. && pnpm build && mkdir -p packages/extension/packages/web && cp -r packages/web/dist packages/extension/packages/web/dist; else pnpm build; fi",
-  "outputDirectory": "packages/web/dist",
-  "installCommand": "pwd && if [[ $(pwd) == */packages/extension ]]; then cd ../..; fi && pnpm install",
+  "services": {
+    "app": {
+      "root": ".",
+      "buildCommand": "VITE_VERCEL_DEPLOYMENT=true pnpm build",
+      "outputDirectory": "packages/web/dist"
+    },
+    "mcp": {
+      "root": "packages/mcp-server",
+      "framework": "express",
+      "entrypoint": "dist/start.js",
+      "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
+      "buildCommand": "cd ../.. && pnpm mcp:build"
+    },
+    "ui": {
+      "root": "packages/ui",
+      "framework": "vite",
+      "installCommand": "cd ../.. && pnpm install --frozen-lockfile",
+      "buildCommand": "cd ../.. && pnpm build:core && pnpm build:ui",
+      "outputDirectory": "dist"
+    }
+  },
   "rewrites": [
     {
-      "source": "/api/:path*",
-      "destination": "/api/:path*"
+      "source": "/mcp",
+      "destination": {
+        "service": "mcp"
+      }
+    },
+    {
+      "source": "/mcp/(.*)",
+      "destination": {
+        "service": "mcp"
+      }
+    },
+    {
+      "source": "/healthz",
+      "destination": {
+        "service": "mcp"
+      }
     },
     {
       "source": "/(.*)",
-      "destination": "/index.html"
+      "destination": {
+        "service": "app"
+      }
     }
   ],
   "github": {
@@ -21,10 +55,5 @@
       "main": true,
       "master": true
     }
-  },
-  "build": {
-    "env": {
-      "VITE_VERCEL_DEPLOYMENT": "true"
-    }
   }
-} 
+}

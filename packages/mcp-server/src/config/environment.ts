@@ -87,7 +87,9 @@ export interface MCPServerConfig {
 
 export function loadConfig(): MCPServerConfig {
   return {
-    httpPort: parseInt(process.env.MCP_HTTP_PORT || '3000'),
+    // Vercel 以 PORT 注入服务应监听的端口；MCP_HTTP_PORT 仍用于本地/自托管显式覆盖，
+    // Docker 镜像通过 --port=3000 参数固定端口，不依赖这里。
+    httpPort: parseInt(process.env.MCP_HTTP_PORT || process.env.PORT || '3000', 10),
     logLevel: (process.env.MCP_LOG_LEVEL as 'debug' | 'info' | 'warn' | 'error') || 'debug',
     defaultLanguage: process.env.MCP_DEFAULT_LANGUAGE || 'en-US',
     preferredModelProvider: process.env.MCP_DEFAULT_MODEL_PROVIDER
