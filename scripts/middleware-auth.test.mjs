@@ -63,3 +63,12 @@ test('middleware allows authenticated requests and deployments without a passwor
     assert.equal(middleware(new Request('https://example.com/api/models')), undefined)
   })
 })
+
+test('matcher leaves the MCP service endpoints out of the access gate', () => {
+  assert.equal(matchesMiddleware('/mcp'), false)
+  assert.equal(matchesMiddleware('/mcp/message'), false)
+  assert.equal(matchesMiddleware('/healthz'), false)
+  // 只放行精确的 /mcp 前缀，相似路径仍然受保护
+  assert.equal(matchesMiddleware('/mcpx'), true)
+  assert.equal(matchesMiddleware('/healthzx'), true)
+})
